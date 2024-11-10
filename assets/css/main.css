@@ -1170,7 +1170,6 @@ section,
 .portfolio .portfolio-content {
   position: relative;
   overflow: hidden;
-
   background-color: #1a1a1a;
   border-radius: 10%;
 }
@@ -1244,6 +1243,47 @@ section,
   transform: scale(1.1);
 }
 
+/* cart page */
+#cart-items {
+  background-color: #e5345b;
+  width: 100%;
+  margin-top: 10%;
+  text-align: center;
+}
+#cart-items img {
+  width: 40%;
+  border-radius: 0.2rem;
+}
+#cart-items h3 {
+  margin-top: 0.2rem;
+}
+.cart-item {
+  background-color: #1a1a1a;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 1rem;
+}
+.cart-item .cart-item-quntity input {
+  width: 80px;
+}
+.cart-item .cart-item-quntity input,
+#cart-items button,
+.cart-summary button {
+  border: none;
+  outline: none;
+  border-radius: 0.2rem;
+  padding: 0.2rem 1rem;
+  font-weight: bold;
+}
+.cart-summary {
+  text-align: right;
+}
+
+.cart-summary p {
+  color: violet;
+  font-size: 24px;
+  font-weight: bold;
+}
 /*--------------------------------------------------------------
 # Portfolio Details Section
 --------------------------------------------------------------*/

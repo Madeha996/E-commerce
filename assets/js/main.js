@@ -1,37 +1,49 @@
 (function () {
   "use strict";
 
-  /**
-   * Apply .scrolled class to the body as the page is scrolled down
-   */
-  function toggleScrolled() {
-    const selectBody = document.querySelector("body");
-    const selectHeader = document.querySelector("#header");
-    if (
-      !selectHeader.classList.contains("scroll-up-sticky") &&
-      !selectHeader.classList.contains("sticky-top") &&
-      !selectHeader.classList.contains("fixed-top")
-    )
-      return;
-    window.scrollY > 100
-      ? selectBody.classList.add("scrolled")
-      : selectBody.classList.remove("scrolled");
-  }
+  document.addEventListener("DOMContentLoaded", function () {
+    /**
+     * Apply .scrolled class to the body as the page is scrolled down
+     */
+    function toggleScrolled() {
+      const selectBody = document.querySelector("body");
+      const selectHeader = document.querySelector("#header");
 
-  document.addEventListener("scroll", toggleScrolled);
-  window.addEventListener("load", toggleScrolled);
+      // Ensure selectHeader exists before accessing its classList
+      if (
+        !selectHeader ||
+        (!selectHeader.classList.contains("scroll-up-sticky") &&
+          !selectHeader.classList.contains("sticky-top") &&
+          !selectHeader.classList.contains("fixed-top"))
+      ) {
+        return;
+      }
 
-  /**
-   * Mobile nav toggle
-   */
-  const mobileNavToggleBtn = document.querySelector(".mobile-nav-toggle");
+      window.scrollY > 100
+        ? selectBody.classList.add("scrolled")
+        : selectBody.classList.remove("scrolled");
+    }
 
-  function mobileNavToogle() {
-    document.querySelector("body").classList.toggle("mobile-nav-active");
-    mobileNavToggleBtn.classList.toggle("bi-list");
-    mobileNavToggleBtn.classList.toggle("bi-x");
-  }
-  mobileNavToggleBtn.addEventListener("click", mobileNavToogle);
+    document.addEventListener("scroll", toggleScrolled);
+    window.addEventListener("load", toggleScrolled);
+
+    /**
+     * Mobile nav toggle
+     */
+    const mobileNavToggleBtn = document.querySelector(".mobile-nav-toggle");
+
+    // Check if the mobileNavToggleBtn element exists
+    if (mobileNavToggleBtn) {
+      function mobileNavToggle() {
+        document.querySelector("body").classList.toggle("mobile-nav-active");
+        mobileNavToggleBtn.classList.toggle("bi-list");
+        mobileNavToggleBtn.classList.toggle("bi-x");
+      }
+      mobileNavToggleBtn.addEventListener("click", mobileNavToggle);
+    } else {
+      console.warn("Mobile nav toggle button not found in the DOM.");
+    }
+  });
 
   /**
    * Hide mobile nav on same-page/hash links
@@ -327,6 +339,7 @@ function displayProducts() {
 
 window.addEventListener("DOMContentLoaded", displayProducts);
 
+// Event listener for adding items to the cart
 document.addEventListener("click", function (e) {
   if (e.target.classList.contains("add-to-cart")) {
     const productId = parseInt(e.target.dataset.id);
@@ -334,6 +347,7 @@ document.addEventListener("click", function (e) {
   }
 });
 
+// Function to add a product to the cart
 function addToCart(productId) {
   const product = products.find((p) => p.id === productId);
   if (product) {
@@ -350,3 +364,85 @@ function addToCart(productId) {
     alert(`${product.name} added to cart!`);
   }
 }
+
+// Function to render cart items on the cart page
+function renderCartItems() {
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  let cartItemsContainer = document.getElementById("cart-items");
+  let cartTotal = 0;
+  cartItemsContainer.innerHTML = "";
+
+  // Loop through each item in the cart and display it
+  cart.forEach((item) => {
+    const itemTotal = item.price * item.quantity;
+    cartTotal += itemTotal;
+
+    // Create HTML structure for each item with quantity update input and update button
+    cartItemsContainer.innerHTML += `
+      <div class="cart-item">
+        <div>
+          <img src=${item.image} class="img-fluid" alt="${item.name}" />
+          <h3>${item.name}</h3>
+          <p>Price: $${item.price.toFixed(2)}</p>
+          <p class="cart-item-quntity">Quantity: 
+            <input type="number" min="1" value="${
+              item.quantity
+            }" class="item-quantity" data-id="${item.id}" />
+            <button class="update-item" data-id="${item.id}">Update</button>
+          <button class="remove-item" data-id="${item.id}">Remove</button>
+          </p>
+        </div>
+      </div>
+    `;
+  });
+
+  // Update the total price
+  document.getElementById("cart-total").innerText = cartTotal.toFixed(2);
+}
+
+// Event listener to remove an item from the cart
+document.addEventListener("click", function (e) {
+  if (e.target.classList.contains("remove-item")) {
+    const itemId = Number(e.target.dataset.id);
+    removeFromCart(itemId);
+  }
+});
+
+// Function to remove item from cart
+function removeFromCart(itemId) {
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  cart = cart.filter((item) => item.id !== itemId);
+  localStorage.setItem("cart", JSON.stringify(cart));
+  renderCartItems();
+}
+
+// Event listener to update quantity of a cart item
+document.addEventListener("click", function (e) {
+  if (e.target.classList.contains("update-item")) {
+    const itemId = Number(e.target.dataset.id);
+    const newQuantity = Number(
+      document.querySelector(`.item-quantity[data-id="${itemId}"]`).value
+    );
+
+    if (newQuantity > 0) {
+      updateCartItem(itemId, newQuantity);
+    } else {
+      alert("Quantity must be at least 1.");
+    }
+  }
+});
+
+// Function to update the quantity of a specific item in the cart
+function updateCartItem(itemId, newQuantity) {
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  const product = cart.find((item) => item.id === itemId);
+
+  if (product) {
+    product.quantity = newQuantity;
+    localStorage.setItem("cart", JSON.stringify(cart));
+    renderCartItems();
+  }
+}
+
+// Initialize cart items on page load
+window.addEventListener("load", renderCartItems);
